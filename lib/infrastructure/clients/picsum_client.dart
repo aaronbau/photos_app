@@ -1,6 +1,6 @@
 import 'package:photos_app/domain/models/photo.dart';
 import 'package:photos_app/environment.dart';
-import 'package:photos_app/infrastructure/clients/responses/picsum_photo_response.dart';
+import 'package:photos_app/infrastructure/clients/responses/picsum_photo_response/picsum_photo_response.dart';
 import 'package:photos_app/infrastructure/http/http_client.dart';
 
 class PicsumClient {
