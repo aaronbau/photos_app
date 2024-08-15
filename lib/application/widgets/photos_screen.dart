@@ -1,10 +1,10 @@
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:photos_app/application/core/widgets/base_screen.dart';
 import 'package:photos_app/application/core/widgets/centered_loading.dart';
+import 'package:photos_app/application/widgets/filter_bottom_sheet.dart';
+import 'package:photos_app/application/widgets/image_card.dart';
 import 'package:photos_app/domain/models/page_info/page_info.dart';
-import 'package:photos_app/domain/models/photo.dart';
 import 'package:photos_app/domain/states/photos_state/photos_state.dart';
 
 class PhotosScreen extends ConsumerStatefulWidget {
@@ -53,7 +53,7 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
           onPressed: () {
             showModalBottomSheet(
               context: context,
-              builder: (context) => _FilterBottomSheet(
+              builder: (context) => FilterBottomSheet(
                 intialPageSize: pageInfo.size,
                 onApply: (pageSize) => setState(() => pageInfo = pageInfo.copyWith(size: pageSize)),
               ),
@@ -71,108 +71,15 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
             itemCount: data.length + (isFetchingMore ? 1 : 0),
             itemBuilder: (context, index) {
               if (index < data.length) {
-                return _ImageCard(photo: data[index]);
+                return ImageCard(photo: data[index]);
               } else {
                 return const CenteredLoading();
               }
             },
           ),
         ),
-        error: (error, stackTrace) => const Text("error"),
+        error: (error, stackTrace) => const Text("Error"),
         loading: () => const CenteredLoading(),
-      ),
-    );
-  }
-}
-
-class _FilterBottomSheet extends StatefulWidget {
-  const _FilterBottomSheet({
-    required this.intialPageSize,
-    required this.onApply,
-  });
-
-  final int intialPageSize;
-  final void Function(int) onApply;
-
-  @override
-  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
-}
-
-class _FilterBottomSheetState extends State<_FilterBottomSheet> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _pageSizeController;
-
-  @override
-  void initState() {
-    super.initState();
-    _pageSizeController = TextEditingController(text: widget.intialPageSize.toString());
-  }
-
-  @override
-  void dispose() {
-    _pageSizeController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: MediaQuery.of(context).viewInsets,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Form(
-          key: _formKey,
-          child: Wrap(
-            alignment: WrapAlignment.end,
-            children: [
-              TextFormField(
-                controller: _pageSizeController,
-                decoration: const InputDecoration(label: Text("Page Size")),
-                validator: (value) => value != null && int.tryParse(value) == null ? 'Input must be a number' : null,
-                autovalidateMode: AutovalidateMode.always,
-              ),
-              FilledButton(
-                onPressed: () {
-                  if (_formKey.currentState?.validate() == true) {
-                    widget.onApply(int.parse(_pageSizeController.text));
-                    Navigator.of(context).pop();
-                  }
-                },
-                child: const Text("Apply"),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ImageCard extends StatelessWidget {
-  const _ImageCard({required this.photo});
-
-  final Photo photo;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(left: 16.0, right: 16.0, bottom: 8.0),
-      child: Card(
-        shape: const Border(),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            CachedNetworkImage(
-              imageUrl: photo.url,
-              fit: BoxFit.cover,
-              progressIndicatorBuilder: (context, url, progress) => LinearProgressIndicator(value: progress.progress),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(photo.author),
-            )
-          ],
-        ),
       ),
     );
   }
