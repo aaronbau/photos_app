@@ -48,6 +48,20 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
   Widget build(BuildContext context) {
     final photos = ref.watch(photosStateProvider);
     return BaseScreen(
+      actions: [
+        IconButton(
+          onPressed: () {
+            showModalBottomSheet(
+              context: context,
+              builder: (context) => _FilterBottomSheet(
+                intialPageSize: pageInfo.size,
+                onApply: (pageSize) => setState(() => pageInfo = pageInfo.copyWith(size: pageSize)),
+              ),
+            );
+          },
+          icon: const Icon(Icons.filter_alt),
+        )
+      ],
       child: photos.when(
         data: (data) => RefreshIndicator(
           onRefresh: () async => ref.invalidate(photosStateProvider),
@@ -66,6 +80,69 @@ class _PhotosScreenState extends ConsumerState<PhotosScreen> {
         ),
         error: (error, stackTrace) => const Text("error"),
         loading: () => const CenteredLoading(),
+      ),
+    );
+  }
+}
+
+class _FilterBottomSheet extends StatefulWidget {
+  const _FilterBottomSheet({
+    required this.intialPageSize,
+    required this.onApply,
+  });
+
+  final int intialPageSize;
+  final void Function(int) onApply;
+
+  @override
+  State<_FilterBottomSheet> createState() => _FilterBottomSheetState();
+}
+
+class _FilterBottomSheetState extends State<_FilterBottomSheet> {
+  final _formKey = GlobalKey<FormState>();
+  late TextEditingController _pageSizeController;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageSizeController = TextEditingController(text: widget.intialPageSize.toString());
+  }
+
+  @override
+  void dispose() {
+    _pageSizeController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: MediaQuery.of(context).viewInsets,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Form(
+          key: _formKey,
+          child: Wrap(
+            alignment: WrapAlignment.end,
+            children: [
+              TextFormField(
+                controller: _pageSizeController,
+                decoration: const InputDecoration(label: Text("Page Size")),
+                validator: (value) => value != null && int.tryParse(value) == null ? 'Input must be a number' : null,
+                autovalidateMode: AutovalidateMode.always,
+              ),
+              FilledButton(
+                onPressed: () {
+                  if (_formKey.currentState?.validate() == true) {
+                    widget.onApply(int.parse(_pageSizeController.text));
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: const Text("Apply"),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
