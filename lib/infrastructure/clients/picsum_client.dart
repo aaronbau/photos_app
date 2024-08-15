@@ -1,3 +1,4 @@
+import 'package:photos_app/domain/models/page_info/page_info.dart';
 import 'package:photos_app/domain/models/photo.dart';
 import 'package:photos_app/environment.dart';
 import 'package:photos_app/infrastructure/clients/responses/picsum_photo_response/picsum_photo_response.dart';
@@ -12,8 +13,9 @@ class PicsumClient {
     return _instance;
   }
 
-  Future<List<Photo>> fetch() async {
-    final response = (await HttpClient.instance.get(Environment.picsumApiUrl));
+  Future<List<Photo>> fetch({required PageInfo nextPageInfo}) async {
+    final response = await HttpClient.instance //
+        .get('${Environment.picsumApiUrl}?page=${nextPageInfo.nextPageToken}&limit=${nextPageInfo.size}');
     return (response.data as List<dynamic>) //
         .map((e) => PicsumPhotoResponse.fromJson(e))
         .map(

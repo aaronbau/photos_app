@@ -6,7 +6,7 @@ part of 'photos_state.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$photosStateHash() => r'dbd0be15b5669173fc2a8beca76cef24d70285f2';
+String _$photosStateHash() => r'5ecef1f020ca9f939a6ba8905ac35f2e8bc211d2';
 
 /// See also [PhotosState].
 @ProviderFor(PhotosState)
